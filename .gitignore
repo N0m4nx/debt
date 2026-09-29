@@ -1,0 +1,15 @@
+__pycache__/
+*.py[cod]
+venv/
+.venv/
+env/
+.env
+.env.*
+.DS_Store
+Thumbs.db
+ntuser.ini
+Desktop.ini
+.vscode/
+.idea/
+*.swp
+EOF
