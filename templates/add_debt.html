@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+
+{% block title %}
+Add Debt
+{% endblock %}
+
+
+{% block content %}
+
+<div class="form-page">
+
+    <div class="page-header">
+
+        <div>
+            <h1>Add Debt</h1>
+
+            <p class="muted">
+                Add a debt to your dashboard.
+            </p>
+        </div>
+
+    </div>
+
+
+    <form
+        method="POST"
+        class="form-card"
+    >
+
+        <div class="form-group">
+
+            <label for="creditor">
+                Creditor
+            </label>
+
+            <input
+                type="text"
+                id="creditor"
+                name="creditor"
+                placeholder="e.g. BDO Credit Card"
+                required
+            >
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label for="description">
+                Description
+            </label>
+
+            <input
+                type="text"
+                id="description"
+                name="description"
+                placeholder="Optional"
+            >
+
+        </div>
+
+
+        <div class="form-row">
+
+            <div class="form-group">
+
+                <label for="original_amount">
+                    Original Amount
+                </label>
+
+                <input
+                    type="number"
+                    id="original_amount"
+                    name="original_amount"
+                    step="0.01"
+                    min="0"
+                    placeholder="0.00"
+                    required
+                >
+
+            </div>
+
+        </div>
+
+
+        <div class="form-row">
+
+            <div class="form-group">
+
+                <label for="minimum_payment">
+                    Minimum Payment
+                </label>
+
+                <input
+                    type="number"
+                    id="minimum_payment"
+                    name="minimum_payment"
+                    step="0.01"
+                    min="0"
+                    placeholder="0.00"
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="due_date">
+                    Due Date
+                </label>
+
+                <input
+                    type="date"
+                    id="due_date"
+                    name="due_date"
+                >
+
+            </div>
+
+        </div>
+
+
+        <div class="form-actions">
+
+            <a
+                href="{{ url_for('index') }}"
+                class="btn btn-secondary"
+            >
+                Cancel
+            </a>
+
+            <button
+                type="submit"
+                class="btn btn-primary"
+            >
+                Add Debt
+            </button>
+
+        </div>
+
+    </form>
+
+</div>
+
+{% endblock %}

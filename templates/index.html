@@ -1,0 +1,566 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Credit & Debt{% endblock %}
+
+{% block content %}
+
+<div class="dashboard-header">
+    <div>
+        <h1>Dashboard</h1>
+        <p class="muted">
+            Track your debts and savings
+        </p>
+    </div>
+
+    <a
+        href="{{ url_for('export_excel') }}"
+        class="btn btn-primary"
+    >
+        Export Excel
+    </a>
+</div>
+
+
+<!-- SUMMARY -->
+<div class="summary-grid">
+
+    <div class="summary-card">
+        <span class="summary-label">Total Debt</span>
+        <strong>{{ total_debt|peso }}</strong>
+    </div>
+
+    <div class="summary-card">
+        <span class="summary-label">Total Savings</span>
+        <strong>{{ total_savings|peso }}</strong>
+    </div>
+
+    <div class="summary-card">
+        <span class="summary-label">Net Position</span>
+        <strong>
+            {{ (total_savings - total_debt)|peso }}
+        </strong>
+    </div>
+
+</div>
+
+
+<!-- SAVINGS -->
+<section class="dashboard-section">
+
+    <div class="section-header">
+        <div>
+            <h2>Savings</h2>
+            <p class="muted">
+                Your savings goals
+            </p>
+        </div>
+
+        <a
+            href="{{ url_for('add_savings') }}"
+            class="btn btn-secondary btn-small"
+        >
+            + Add Savings
+        </a>
+    </div>
+
+
+    {% if savings %}
+
+    <div class="card-grid">
+
+        {% for saving in savings %}
+
+        <div class="item-card">
+
+            <div class="card-header">
+                <div>
+                    <h3>{{ saving.name }}</h3>
+                    <span class="muted">
+                        Target: {{ saving.target_amount|peso }}
+                    </span>
+                </div>
+            </div>
+
+
+            <div class="saving-amount">
+                <strong>
+                    {{ saving.current_amount|peso }}
+                </strong>
+
+                <span>
+                    / {{ saving.target_amount|peso }}
+                </span>
+            </div>
+
+
+            {% set percentage =
+                (saving.current_amount / saving.target_amount * 100)
+                if saving.target_amount > 0
+                else 0
+            %}
+
+            <div class="progress">
+                <div
+                    class="progress-bar"
+                    style="width: {{ [percentage, 100]|min }}%"
+                ></div>
+            </div>
+
+            <div class="saving-info">
+
+                <div>
+                    <span class="muted">Contribution</span>
+                    <strong>
+                        {{ saving.contribution_amount|peso }}
+                    </strong>
+                </div>
+
+                <div>
+                    <span class="muted">Remaining</span>
+                    <strong>
+                        {{
+                            [
+                                saving.target_amount -
+                                saving.current_amount,
+                                0
+                            ]|max|peso
+                        }}
+                    </strong>
+                </div>
+
+            </div>
+
+
+            <div class="card-actions">
+
+                {% if saving.current_amount < saving.target_amount %}
+
+                <form
+                    action="{{ url_for(
+                        'mark_savings_saved',
+                        saving_id=saving.id
+                    ) }}"
+                    method="POST"
+                >
+                    <button
+                        type="submit"
+                        class="btn btn-success btn-small"
+                    >
+                        ✓ Mark as Saved
+                    </button>
+                </form>
+
+                {% else %}
+
+                <span class="goal-complete">
+                    ✓ Goal Complete
+                </span>
+
+                {% endif %}
+
+
+                <form
+                    action="{{ url_for(
+                        'archive_savings',
+                        saving_id=saving.id
+                    ) }}"
+                    method="POST"
+                >
+                    <button
+                        type="submit"
+                        class="btn btn-secondary btn-small"
+                    >
+                        Archive
+                    </button>
+                </form>
+
+
+                <form
+                    action="{{ url_for(
+                        'delete_savings',
+                        saving_id=saving.id
+                    ) }}"
+                    method="POST"
+                    onsubmit="return confirm(
+                        'Delete this savings goal?'
+                    );"
+                >
+                    <button
+                        type="submit"
+                        class="btn btn-danger btn-small"
+                    >
+                        Delete
+                    </button>
+                </form>
+
+            </div>
+
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+    {% else %}
+
+    <div class="empty-state">
+        <p>No savings goals yet.</p>
+
+        <a
+            href="{{ url_for('add_savings') }}"
+            class="btn btn-secondary btn-small"
+        >
+            + Add Savings
+        </a>
+    </div>
+
+    {% endif %}
+
+</section>
+
+
+<!-- DEBTS -->
+<section class="dashboard-section">
+
+    <div class="section-header">
+        <div>
+            <h2>Debts</h2>
+            <p class="muted">
+                Your current debts
+            </p>
+        </div>
+
+        <a
+            href="{{ url_for('add_debt') }}"
+            class="btn btn-secondary btn-small"
+        >
+            + Add Debt
+        </a>
+    </div>
+
+
+    {% if debts %}
+
+    <div class="card-grid">
+
+        {% for debt in debts %}
+
+        <div class="item-card">
+
+            <div class="card-header">
+
+                <div>
+                    <h3>{{ debt.creditor }}</h3>
+
+                    {% if debt.description %}
+                    <p class="muted">
+                        {{ debt.description }}
+                    </p>
+                    {% endif %}
+                </div>
+
+                <span
+                    class="status
+                    {% if debt.status == 'paid' %}
+                        status-paid
+                    {% else %}
+                        status-active
+                    {% endif %}"
+                >
+                    {{ debt.status|capitalize }}
+                </span>
+
+            </div>
+
+
+            <div class="debt-amount">
+                <span class="muted">Remaining</span>
+
+                <strong>
+                    {{ debt.remaining_amount|peso }}
+                </strong>
+            </div>
+
+
+            <div class="debt-info">
+
+                <div>
+                    <span class="muted">Original</span>
+                    <strong>
+                        {{ debt.original_amount|peso }}
+                    </strong>
+                </div>
+
+                <div>
+                    <span class="muted">Interest</span>
+                    <strong>
+                        {{ debt.interest_rate }}%
+                    </strong>
+                </div>
+
+                <div>
+                    <span class="muted">Minimum</span>
+                    <strong>
+                        {{ debt.minimum_payment|peso }}
+                    </strong>
+                </div>
+
+                <div>
+                    <span class="muted">Due Date</span>
+                    <strong>
+                        {{ debt.due_date or '—' }}
+                    </strong>
+                </div>
+
+            </div>
+
+
+            <div class="card-actions">
+
+                <a
+                    href="{{ url_for(
+                        'debt_detail',
+                        debt_id=debt.id
+                    ) }}"
+                    class="btn btn-secondary btn-small"
+                >
+                    Manage
+                </a>
+
+                <form
+                    action="{{ url_for(
+                        'archive_debt',
+                        debt_id=debt.id
+                    ) }}"
+                    method="POST"
+                >
+                    <button
+                        type="submit"
+                        class="btn btn-secondary btn-small"
+                    >
+                        Archive
+                    </button>
+                </form>
+
+                <form
+                    action="{{ url_for(
+                        'delete_debt',
+                        debt_id=debt.id
+                    ) }}"
+                    method="POST"
+                    onsubmit="return confirm(
+                        'Delete this debt?'
+                    );"
+                >
+                    <button
+                        type="submit"
+                        class="btn btn-danger btn-small"
+                    >
+                        Delete
+                    </button>
+                </form>
+
+            </div>
+
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+    {% else %}
+
+    <div class="empty-state">
+
+        <p>No debts yet.</p>
+
+        <a
+            href="{{ url_for('add_debt') }}"
+            class="btn btn-secondary btn-small"
+        >
+            + Add Debt
+        </a>
+
+    </div>
+
+    {% endif %}
+
+</section>
+
+
+<!-- ARCHIVE -->
+<section class="dashboard-section">
+
+    <div class="section-header">
+        <div>
+            <h2>Archive</h2>
+            <p class="muted">
+                Paid debts and completed savings goals
+            </p>
+        </div>
+    </div>
+
+
+    {% if archived_debts or archived_savings %}
+
+    <div class="card-grid">
+
+        {% for debt in archived_debts %}
+
+        <div class="item-card">
+
+            <div class="card-header">
+
+                <div>
+                    <h3>{{ debt.creditor }}</h3>
+
+                    {% if debt.description %}
+                    <p class="muted">
+                        {{ debt.description }}
+                    </p>
+                    {% endif %}
+                </div>
+
+                <span class="status status-paid">
+                    Paid
+                </span>
+
+            </div>
+
+
+            <div class="debt-amount">
+                <span class="muted">Original</span>
+
+                <strong>
+                    {{ debt.original_amount|peso }}
+                </strong>
+            </div>
+
+
+            <div class="card-actions">
+
+                <form
+                    action="{{ url_for(
+                        'unarchive_debt',
+                        debt_id=debt.id
+                    ) }}"
+                    method="POST"
+                >
+                    <button
+                        type="submit"
+                        class="btn btn-secondary btn-small"
+                    >
+                        Restore
+                    </button>
+                </form>
+
+                <form
+                    action="{{ url_for(
+                        'delete_debt',
+                        debt_id=debt.id
+                    ) }}"
+                    method="POST"
+                    onsubmit="return confirm(
+                        'Delete this debt?'
+                    );"
+                >
+                    <button
+                        type="submit"
+                        class="btn btn-danger btn-small"
+                    >
+                        Delete
+                    </button>
+                </form>
+
+            </div>
+
+        </div>
+
+        {% endfor %}
+
+
+        {% for saving in archived_savings %}
+
+        <div class="item-card">
+
+            <div class="card-header">
+
+                <div>
+                    <h3>{{ saving.name }}</h3>
+                    <span class="muted">
+                        Target: {{ saving.target_amount|peso }}
+                    </span>
+                </div>
+
+                <span class="status status-paid">
+                    Complete
+                </span>
+
+            </div>
+
+
+            <div class="saving-amount">
+                <strong>
+                    {{ saving.current_amount|peso }}
+                </strong>
+
+                <span>
+                    / {{ saving.target_amount|peso }}
+                </span>
+            </div>
+
+
+            <div class="card-actions">
+
+                <form
+                    action="{{ url_for(
+                        'unarchive_savings',
+                        saving_id=saving.id
+                    ) }}"
+                    method="POST"
+                >
+                    <button
+                        type="submit"
+                        class="btn btn-secondary btn-small"
+                    >
+                        Restore
+                    </button>
+                </form>
+
+                <form
+                    action="{{ url_for(
+                        'delete_savings',
+                        saving_id=saving.id
+                    ) }}"
+                    method="POST"
+                    onsubmit="return confirm(
+                        'Delete this savings goal?'
+                    );"
+                >
+                    <button
+                        type="submit"
+                        class="btn btn-danger btn-small"
+                    >
+                        Delete
+                    </button>
+                </form>
+
+            </div>
+
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+    {% else %}
+
+    <div class="empty-state">
+        <p class="muted">Nothing archived yet.</p>
+    </div>
+
+    {% endif %}
+
+</section>
+
+{% endblock %}

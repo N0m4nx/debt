@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+
+{% block title %}
+{{ debt.creditor }} - Credit & Debt
+{% endblock %}
+
+
+{% block content %}
+
+<div class="form-page">
+
+    <div class="page-header">
+
+        <div>
+
+            <a
+                href="{{ url_for('index') }}"
+                class="back-link"
+            >
+                ← Dashboard
+            </a>
+
+            <h1>
+                {{ debt.creditor }}
+            </h1>
+
+            {% if debt.description %}
+
+                <p class="muted">
+                    {{ debt.description }}
+                </p>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+
+    <div class="summary-grid">
+
+        <div class="summary-card">
+
+            <span class="summary-label">
+                Remaining
+            </span>
+
+            <strong class="summary-value debt-value">
+                {{ debt.remaining_amount|peso }}
+            </strong>
+
+        </div>
+
+
+        <div class="summary-card">
+
+            <span class="summary-label">
+                Original
+            </span>
+
+            <strong class="summary-value">
+                {{ debt.original_amount|peso }}
+            </strong>
+
+        </div>
+
+
+        <div class="summary-card">
+
+            <span class="summary-label">
+                Status
+            </span>
+
+            <strong class="summary-value">
+                {{ debt.status|capitalize }}
+            </strong>
+
+        </div>
+
+    </div>
+
+
+    {% if debt.remaining_amount > 0 %}
+
+        <section class="section">
+
+            <h2>Record Payment</h2>
+
+            <form
+                method="POST"
+                action="{{
+                    url_for(
+                        'payment',
+                        debt_id=debt.id
+                    )
+                }}"
+                class="form-card"
+            >
+
+                <div class="form-group">
+
+                    <label for="amount">
+                        Payment Amount
+                    </label>
+
+                    <input
+                        type="number"
+                        id="amount"
+                        name="amount"
+                        step="0.01"
+                        min="0.01"
+                        max="{{ debt.remaining_amount }}"
+                        placeholder="0.00"
+                        required
+                    >
+
+                </div>
+
+
+                <button
+                    type="submit"
+                    class="btn btn-primary"
+                >
+                    Record Payment
+                </button>
+
+            </form>
+
+        </section>
+
+    {% endif %}
+
+
+    <section class="section">
+
+        <div class="section-header">
+
+            <h2>Payment History</h2>
+
+        </div>
+
+
+        {% if payments %}
+
+            <div class="table-wrapper">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+                            <th>Date</th>
+                            <th>Amount</th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        {% for payment in payments %}
+
+                            <tr>
+
+                                <td>
+                                    {{ payment.created_at }}
+                                </td>
+
+                                <td class="savings-value">
+                                    {{ payment.amount|peso }}
+                                </td>
+
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        {% else %}
+
+            <div class="empty-state">
+                <p class="muted">
+                    No payments recorded yet.
+                </p>
+            </div>
+
+        {% endif %}
+
+    </section>
+
+</div>
+
+{% endblock %}

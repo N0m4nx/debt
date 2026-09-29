@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block title %}
+Add Savings
+{% endblock %}
+
+
+{% block content %}
+
+<div class="form-page">
+
+    <div class="page-header">
+
+        <div>
+            <h1>Add Savings</h1>
+
+            <p class="muted">
+                Create a savings goal.
+            </p>
+        </div>
+
+    </div>
+
+
+    <form
+        method="POST"
+        class="form-card"
+    >
+
+        <div class="form-group">
+
+            <label for="name">
+                Savings Name
+            </label>
+
+            <input
+                type="text"
+                id="name"
+                name="name"
+                placeholder="e.g. Emergency Fund"
+                required
+            >
+
+        </div>
+
+
+        <div class="form-row">
+
+            <div class="form-group">
+
+                <label for="target_amount">
+                    Target Amount
+                </label>
+
+                <input
+                    type="number"
+                    id="target_amount"
+                    name="target_amount"
+                    step="0.01"
+                    min="0"
+                    placeholder="50000"
+                    required
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="current_amount">
+                    Current Amount
+                </label>
+
+                <input
+                    type="number"
+                    id="current_amount"
+                    name="current_amount"
+                    step="0.01"
+                    min="0"
+                    value="0"
+                >
+
+            </div>
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label for="contribution_amount">
+                Contribution Amount
+            </label>
+
+            <input
+                type="number"
+                id="contribution_amount"
+                name="contribution_amount"
+                step="0.01"
+                min="0"
+                placeholder="1000"
+                required
+            >
+
+            <span class="field-help">
+                This amount will be added every time
+                you click "Mark as Saved".
+            </span>
+
+        </div>
+
+
+        <div class="form-actions">
+
+            <a
+                href="{{ url_for('index') }}"
+                class="btn btn-secondary"
+            >
+                Cancel
+            </a>
+
+            <button
+                type="submit"
+                class="btn btn-primary"
+            >
+                Add Savings
+            </button>
+
+        </div>
+
+    </form>
+
+</div>
+
+{% endblock %}
