@@ -13,3 +13,6 @@ Desktop.ini
 .idea/
 *.swp
 EOF
+deploy-preprod.sh
+deploy-prod.sh
+publish.sh
